@@ -46,3 +46,11 @@ def get_all_tasks_from_db():
     tasks = cursor.fetchall()
     conn.close()
     return tasks
+
+
+def update_task_status(title: str, new_status: str):
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET status = ? WHERE title = ?", (new_status, title))
+    conn.commit()
+    conn.close()
