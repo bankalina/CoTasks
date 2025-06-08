@@ -38,6 +38,7 @@ class TaskApp:
         self.status_combo = ttk.Combobox(self.frame, textvariable=self.status_var)
         self.status_combo['values'] = ["To Do", "In Progress", "Done"]
         self.status_combo.grid(row=3, column=1)
+        tk.Button(self.frame, text="Change Status", command=self.change_status).grid(row=3, column=2)
 
         tk.Button(self.frame, text="Sort by Title", command=lambda: self.set_sort("title")).grid(row=4, column=0)
         tk.Button(self.frame, text="Sort by Status", command=lambda: self.set_sort("status")).grid(row=4, column=1)
@@ -60,13 +61,19 @@ class TaskApp:
         title = self.task_title_entry.get().strip()
         username = self.task_user_entry.get().strip()
         description = self.task_desc_entry.get().strip()
+
         if title and username:
-            self.manager.create_task(title, description, username)
-            messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
-            self.task_title_entry.delete(0, tk.END)
-            self.task_user_entry.delete(0, tk.END)
-            self.task_desc_entry.delete(0, tk.END)
-            self.load_tasks()
+            success = self.manager.create_task(title, description, username)
+            if success:
+                messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
+                self.task_title_entry.delete(0, tk.END)
+                self.task_user_entry.delete(0, tk.END)
+                self.task_desc_entry.delete(0, tk.END)
+                self.load_tasks()
+            else:
+                messagebox.showerror("Error", f"User '{username}' does not exist.")
+        else:
+            messagebox.showwarning("Missing data", "Please fill in both title and username.")
 
     def change_status(self):
         selection = self.task_listbox.curselection()
@@ -76,11 +83,11 @@ class TaskApp:
         index = selection[0]
         title_line = self.task_listbox.get(index)
         title = title_line.split(" - ")[0].strip()
-        new_status = self.status_entry.get().strip()
+        new_status = self.status_var.get().strip()
         if new_status:
             self.manager.change_status(title, new_status)
             messagebox.showinfo("Status Updated", f"Task '{title}' status changed to '{new_status}'.")
-            self.status_entry.delete(0, tk.END)
+            self.status_var.set("")
             self.load_tasks()
 
     def set_sort(self, criteria):

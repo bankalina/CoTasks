@@ -20,8 +20,8 @@ class TaskManager:
     def add_user(self, username: str):
         add_user_to_db(username)
 
-    def create_task(self, title: str, description: str, username: str, priority: bool = False):
-        add_task_to_db(title, description, "To Do", username)
+    def create_task(self, title: str, description: str, username: str, priority: bool = False) -> bool:
+        return add_task_to_db(title, description, "To Do", username)
 
     def change_status(self, title: str, new_status: str):
         update_task_status(title, new_status)

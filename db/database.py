@@ -34,14 +34,21 @@ def add_user_to_db(username: str):
     conn.close()
 
 
-def add_task_to_db(title: str, description: str, status: str, username: str):
+def add_task_to_db(title: str, description: str, status: str, username: str) -> bool:
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = ON")
-    cursor.execute("INSERT INTO tasks (title, description, status, assigned_to) VALUES (?, ?, ?, ?)",
-                   (title, description, status, username))
-    conn.commit()
-    conn.close()
+    try:
+        cursor.execute(
+            "INSERT INTO tasks (title, description, status, assigned_to) VALUES (?, ?, ?, ?)",
+            (title, description, status, username)
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError as e:
+        return False
+    finally:
+        conn.close()
 
 
 def get_all_tasks_from_db():
