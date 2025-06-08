@@ -1,0 +1,98 @@
+import tkinter as tk
+from tkinter import messagebox, Toplevel
+from core.task_manager import TaskManager
+from patterns.strategy import SortByTitle, SortByStatus
+
+
+class TaskApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("CoTask – Team To-Do App")
+
+        self.manager = TaskManager.get_instance()
+
+        self.frame = tk.Frame(self.root)
+        self.frame.pack(padx=10, pady=10)
+
+        tk.Label(self.frame, text="Username").grid(row=0, column=0)
+        self.username_entry = tk.Entry(self.frame)
+        self.username_entry.grid(row=0, column=1)
+        tk.Button(self.frame, text="Add User", command=self.add_user).grid(row=0, column=2)
+
+        tk.Label(self.frame, text="Task Title").grid(row=1, column=0)
+        self.task_title_entry = tk.Entry(self.frame)
+        self.task_title_entry.grid(row=1, column=1)
+
+        tk.Label(self.frame, text="Assign to (username)").grid(row=2, column=0)
+        self.task_user_entry = tk.Entry(self.frame)
+        self.task_user_entry.grid(row=2, column=1)
+        tk.Button(self.frame, text="Add Task", command=self.add_task).grid(row=2, column=2)
+
+        tk.Label(self.frame, text="New Status").grid(row=3, column=0)
+        self.status_entry = tk.Entry(self.frame)
+        self.status_entry.grid(row=3, column=1)
+        tk.Button(self.frame, text="Change Status", command=self.change_status).grid(row=3, column=2)
+
+        tk.Button(self.frame, text="Sort by Title", command=lambda: self.set_sort("title")).grid(row=4, column=0)
+        tk.Button(self.frame, text="Sort by Status", command=lambda: self.set_sort("status")).grid(row=4, column=1)
+        tk.Button(self.frame, text="Refresh Tasks", command=self.load_tasks).grid(row=4, column=2)
+        tk.Button(self.frame, text="Show All Tasks", command=self.show_all_tasks).grid(row=5, column=1, pady=5)
+
+        self.task_listbox = tk.Listbox(self.root, width=60)
+        self.task_listbox.pack(pady=10)
+
+        self.load_tasks()
+
+    def add_user(self):
+        username = self.username_entry.get().strip()
+        if username:
+            self.manager.add_user(username)
+            messagebox.showinfo("User Added", f"User '{username}' added.")
+            self.username_entry.delete(0, tk.END)
+
+    def add_task(self):
+        title = self.task_title_entry.get().strip()
+        username = self.task_user_entry.get().strip()
+        if title and username:
+            self.manager.create_task(title, username)
+            messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
+            self.task_title_entry.delete(0, tk.END)
+            self.task_user_entry.delete(0, tk.END)
+            self.load_tasks()
+
+    def change_status(self):
+        selection = self.task_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No selection", "Select a task from the list.")
+            return
+        index = selection[0]
+        title_line = self.task_listbox.get(index)
+        title = title_line.split(" - ")[0].strip()
+        new_status = self.status_entry.get().strip()
+        if new_status:
+            self.manager.change_status(title, new_status)
+            messagebox.showinfo("Status Updated", f"Task '{title}' status changed to '{new_status}'.")
+            self.status_entry.delete(0, tk.END)
+            self.load_tasks()
+
+    def set_sort(self, criteria):
+        if criteria == "title":
+            self.manager.set_sort_strategy(SortByTitle())
+        elif criteria == "status":
+            self.manager.set_sort_strategy(SortByStatus())
+        self.load_tasks()
+
+    def load_tasks(self):
+        self.task_listbox.delete(0, tk.END)
+        tasks = self.manager.list_tasks()
+        for task in tasks:
+            self.task_listbox.insert(tk.END, task.display())
+
+    def show_all_tasks(self):
+        all_window = Toplevel(self.root)
+        all_window.title("All Tasks")
+        tk.Label(all_window, text="List of all tasks:", font=("Arial", 12, "bold")).pack(pady=5)
+        all_list = tk.Listbox(all_window, width=70)
+        all_list.pack(padx=10, pady=10)
+        for task in self.manager.list_tasks():
+            all_list.insert(tk.END, task.display())
