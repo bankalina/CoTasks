@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox, Toplevel
 from core.task_manager import TaskManager
 from patterns.strategy import SortByTitle, SortByStatus
@@ -23,15 +24,20 @@ class TaskApp:
         self.task_title_entry = tk.Entry(self.frame)
         self.task_title_entry.grid(row=1, column=1)
 
+        tk.Label(self.frame, text="Task Description").grid(row=1, column=2)
+        self.task_desc_entry = tk.Entry(self.frame)
+        self.task_desc_entry.grid(row=1, column=3)
+
         tk.Label(self.frame, text="Assign to (username)").grid(row=2, column=0)
         self.task_user_entry = tk.Entry(self.frame)
         self.task_user_entry.grid(row=2, column=1)
         tk.Button(self.frame, text="Add Task", command=self.add_task).grid(row=2, column=2)
 
         tk.Label(self.frame, text="New Status").grid(row=3, column=0)
-        self.status_entry = tk.Entry(self.frame)
-        self.status_entry.grid(row=3, column=1)
-        tk.Button(self.frame, text="Change Status", command=self.change_status).grid(row=3, column=2)
+        self.status_var = tk.StringVar()
+        self.status_combo = ttk.Combobox(self.frame, textvariable=self.status_var)
+        self.status_combo['values'] = ["To Do", "In Progress", "Done"]
+        self.status_combo.grid(row=3, column=1)
 
         tk.Button(self.frame, text="Sort by Title", command=lambda: self.set_sort("title")).grid(row=4, column=0)
         tk.Button(self.frame, text="Sort by Status", command=lambda: self.set_sort("status")).grid(row=4, column=1)
@@ -53,11 +59,13 @@ class TaskApp:
     def add_task(self):
         title = self.task_title_entry.get().strip()
         username = self.task_user_entry.get().strip()
+        description = self.task_desc_entry.get().strip()
         if title and username:
-            self.manager.create_task(title, username)
+            self.manager.create_task(title, description, username)
             messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
             self.task_title_entry.delete(0, tk.END)
             self.task_user_entry.delete(0, tk.END)
+            self.task_desc_entry.delete(0, tk.END)
             self.load_tasks()
 
     def change_status(self):

@@ -14,6 +14,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
+            description TEXT,
             status TEXT NOT NULL,
             assigned_to TEXT,
             FOREIGN KEY (assigned_to) REFERENCES users(username)
@@ -31,10 +32,11 @@ def add_user_to_db(username: str):
     conn.close()
 
 
-def add_task_to_db(title: str, status: str, username: str):
+def add_task_to_db(title: str, description: str, status: str, username: str):
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO tasks (title, status, assigned_to) VALUES (?, ?, ?)", (title, status, username))
+    cursor.execute("INSERT INTO tasks (title, description, status, assigned_to) VALUES (?, ?, ?, ?)",
+                   (title, description, status, username))
     conn.commit()
     conn.close()
 
@@ -42,7 +44,7 @@ def add_task_to_db(title: str, status: str, username: str):
 def get_all_tasks_from_db():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT title, status, assigned_to FROM tasks")
+    cursor.execute("SELECT title, description, status, assigned_to FROM tasks")
     tasks = cursor.fetchall()
     conn.close()
     return tasks
