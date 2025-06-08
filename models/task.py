@@ -1,22 +1,15 @@
-from __future__ import annotations
-from typing import List, Optional
-from models.user import User
+from typing import Optional
 
 
 class Task:
-    def __init__(self, title: str, assigned_to: Optional[User] = None):
-        self.title: str = title
-        self.status: str = "To Do"
-        self.assigned_to: Optional[User] = assigned_to
-        self.observers: List[User] = []
-
-    def set_status(self, status: str) -> None:
+    def __init__(self, title: str, status: str, assigned_to: Optional[str] = None):
+        self.title = title
         self.status = status
-        self.notify_observers(f"Task '{self.title}' status changed to {self.status}")
+        self.assigned_to = assigned_to
 
-    def attach(self, observer: User) -> None:
-        self.observers.append(observer)
+    @classmethod
+    def from_tuple(cls, row: tuple) -> "Task":
+        return cls(title=row[0], status=row[1], assigned_to=row[2])
 
-    def notify_observers(self, message: str) -> None:
-        for observer in self.observers:
-            observer.notify(message)
+    def display(self) -> str:
+        return f"{self.title} - {self.status} - assigned to {self.assigned_to}"

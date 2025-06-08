@@ -1,16 +1,14 @@
-from typing import Dict, List, Optional
-from models.user import User
+from typing import List, Dict, Optional
 from models.task import Task
-from patterns.factory import TaskFactory
+from db.database import add_user_to_db, add_task_to_db, get_all_tasks_from_db, update_task_status
 from patterns.strategy import SortStrategy, SortByTitle
+from patterns.decorator import PriorityTaskDecorator
 
 
 class TaskManager:
     _instance: Optional["TaskManager"] = None
 
     def __init__(self):
-        self.users: Dict[str, User] = {}
-        self.tasks: List[Task] = []
         self.sort_strategy: SortStrategy = SortByTitle()
 
     @classmethod
@@ -19,23 +17,20 @@ class TaskManager:
             cls._instance = TaskManager()
         return cls._instance
 
-    def add_user(self, username: str) -> None:
-        if username not in self.users:
-            self.users[username] = User(username)
+    def add_user(self, username: str):
+        add_user_to_db(username)
 
-    def create_task(self, title: str, username: str) -> None:
-        user = self.users.get(username)
-        if user:
-            task = TaskFactory().create_task(title, user)
-            self.tasks.append(task)
-            user.tasks.append(task)
+    def create_task(self, title: str, username: str, priority: bool = False):
+        add_task_to_db(title, "To Do", username)
 
-    def change_status(self, task_index: int, status: str) -> None:
-        if 0 <= task_index < len(self.tasks):
-            self.tasks[task_index].set_status(status)
+    def change_status(self, title: str, new_status: str):
+        update_task_status(title, new_status)
 
-    def set_sort_strategy(self, strategy: SortStrategy) -> None:
+    def set_sort_strategy(self, strategy: SortStrategy):
         self.sort_strategy = strategy
 
     def list_tasks(self) -> List[Task]:
-        return self.sort_strategy.sort(self.tasks)
+        tasks_raw = get_all_tasks_from_db()
+        tasks = [Task.from_tuple(row) for row in tasks_raw]
+        sorted_tasks = self.sort_strategy.sort(tasks)
+        return [PriorityTaskDecorator(t) if "[PRIORITY]" in t.title else t for t in sorted_tasks]
