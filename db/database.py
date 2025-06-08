@@ -4,6 +4,7 @@ import sqlite3
 def init_db():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,6 +28,7 @@ def init_db():
 def add_user_to_db(username: str):
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
     cursor.execute("INSERT OR IGNORE INTO users (username) VALUES (?)", (username,))
     conn.commit()
     conn.close()
@@ -35,6 +37,7 @@ def add_user_to_db(username: str):
 def add_task_to_db(title: str, description: str, status: str, username: str):
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
     cursor.execute("INSERT INTO tasks (title, description, status, assigned_to) VALUES (?, ?, ?, ?)",
                    (title, description, status, username))
     conn.commit()
@@ -44,6 +47,7 @@ def add_task_to_db(title: str, description: str, status: str, username: str):
 def get_all_tasks_from_db():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
     cursor.execute("SELECT title, description, status, assigned_to FROM tasks")
     tasks = cursor.fetchall()
     conn.close()
@@ -53,6 +57,7 @@ def get_all_tasks_from_db():
 def update_task_status(title: str, new_status: str):
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
     cursor.execute("UPDATE tasks SET status = ? WHERE title = ?", (new_status, title))
     conn.commit()
     conn.close()
