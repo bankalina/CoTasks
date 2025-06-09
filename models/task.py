@@ -12,5 +12,17 @@ class Task:
     def from_tuple(cls, row: tuple) -> "Task":
         return cls(title=row[0], description=row[1], status=row[2], assigned_to=row[3])
 
+    def get_title(self) -> str:
+        return self.title
+
+    def get_description(self) -> str:
+        return self.description
+
+    def get_status(self) -> str:
+        return self.status
+
+    def get_assigned_to(self) -> str:
+        return self.assigned_to
+
     def display(self) -> str:
-        return f"{self.title} ({self.status}) - {self.description} - assigned to {self.assigned_to}"
+        return f"{self.title} - {self.status} - {self.description} - assigned to {self.assigned_to}"
