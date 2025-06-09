@@ -14,10 +14,10 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
+            title TEXT UNIQUE NOT NULL,
             description TEXT,
             status TEXT NOT NULL,
-            assigned_to TEXT,
+            assigned_to TEXT NOT NULL,
             FOREIGN KEY (assigned_to) REFERENCES users(username)
         )
     ''')
