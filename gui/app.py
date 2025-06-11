@@ -41,8 +41,7 @@ class TaskApp:
 
         tk.Button(self.frame, text="Sort by Title", command=lambda: self.set_sort("title")).grid(row=4, column=0)
         tk.Button(self.frame, text="Sort by Status", command=lambda: self.set_sort("status")).grid(row=4, column=1)
-        tk.Button(self.frame, text="Refresh Tasks", command=self.load_tasks).grid(row=4, column=2)
-        tk.Button(self.frame, text="Show All Tasks", command=self.show_all_tasks).grid(row=5, column=1, pady=5)
+        tk.Button(self.frame, text="Delete Task", command=self.delete_task).grid(row=4, column=2, pady=5)
 
         self.task_listbox = tk.Listbox(self.root, width=60)
         self.task_listbox.pack(pady=10)
@@ -96,12 +95,23 @@ class TaskApp:
 
         if new_status:
             self.manager.change_status(selected_task, new_status)
-            messagebox.showinfo("Status Updated", f"Task '{selected_task.get_title()}' "
-                                                  f"status changed to '{new_status}'.")
+            messagebox.showinfo("Status Updated", f"Task '{selected_task.get_title()}' status changed to '{new_status}'.")
             self.status_var.set("")
             self.load_tasks()
         else:
             messagebox.showwarning("Missing status", "Please select a new status.")
+
+    def delete_task(self):
+        selection = self.task_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No selection", "Select a task to delete.")
+            return
+
+        index = selection[0]
+        task_to_delete = self.task_objects[index]
+        self.manager.delete_task(task_to_delete)
+        messagebox.showinfo("Task Deleted", f"Task '{task_to_delete.get_title()}' has been deleted.")
+        self.load_tasks()
 
     def set_sort(self, criteria):
         if criteria == "title":
@@ -115,12 +125,3 @@ class TaskApp:
         self.task_objects = self.manager.list_tasks()
         for task in self.task_objects:
             self.task_listbox.insert(tk.END, task.display())
-
-    def show_all_tasks(self):
-        all_window = Toplevel(self.root)
-        all_window.title("All Tasks")
-        tk.Label(all_window, text="List of all tasks:", font=("Arial", 12, "bold")).pack(pady=5)
-        all_list = tk.Listbox(all_window, width=70)
-        all_list.pack(padx=10, pady=10)
-        for task in self.task_objects:
-            all_list.insert(tk.END, task.display())

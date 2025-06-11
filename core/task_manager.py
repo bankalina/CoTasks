@@ -43,3 +43,7 @@ class TaskManager:
 
     def list_tasks(self) -> List[Task]:
         return self.sort_strategy.sort(self.tasks)
+
+    def delete_task(self, task: Task):
+        if task in self.tasks:
+            self.tasks.remove(task)
