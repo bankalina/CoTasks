@@ -65,15 +65,18 @@ class TaskApp:
         username = self.task_user_entry.get().strip()
         description = self.task_desc_entry.get().strip()
         if title and username:
-            success = self.manager.create_task(title, description, username)
-            if success:
+            result = self.manager.create_task(title, description, username)
+            if result == "success":
                 messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
                 self.task_title_entry.delete(0, tk.END)
                 self.task_user_entry.delete(0, tk.END)
                 self.task_desc_entry.delete(0, tk.END)
                 self.load_tasks()
-            else:
-                messagebox.showerror("Error", f"User '{username}' does not exist.")
+            elif result == "duplicate_title":
+                messagebox.showwarning("Duplicate Task", f"A task titled '{title}' already exists.")
+            elif result == "user_not_found":
+                messagebox.showerror("User Not Found", f"User '{username}' does not exist.")
+
         else:
             messagebox.showwarning("Missing data", "Please fill in both title and username.")
 

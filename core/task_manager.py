@@ -23,12 +23,15 @@ class TaskManager:
         self.users[username] = username
         return True
 
-    def create_task(self, title: str, description: str, username: str) -> bool:
+    def create_task(self, title: str, description: str, username: str) -> str:
         if username not in self.users:
-            return False
+            return "user_not_found"
+        if any(task.get_title() == title for task in self.tasks):
+            return "duplicate_title"
         task = Task(title, description, "To Do", assigned_to=username)
         self.tasks.append(task)
-        return True
+        return "success"
+
 
     def change_status(self, task: Task, new_status: str):
         task.set_status(new_status)
