@@ -23,6 +23,9 @@ class TaskManager:
         self.users[username] = username
         return True
 
+    def get_usernames(self) -> List[str]:
+        return list(self.users.keys())
+
     def create_task(self, title: str, description: str, username: str) -> str:
         if username not in self.users:
             return "user_not_found"
@@ -31,7 +34,6 @@ class TaskManager:
         task = Task(title, description, "To Do", assigned_to=username)
         self.tasks.append(task)
         return "success"
-
 
     def change_status(self, task: Task, new_status: str):
         task.set_status(new_status)
