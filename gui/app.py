@@ -28,8 +28,8 @@ class TaskApp:
         self.task_desc_entry.grid(row=1, column=3)
 
         tk.Label(self.frame, text="Assign to (username)").grid(row=2, column=0)
-        self.task_user_entry = tk.Entry(self.frame)
-        self.task_user_entry.grid(row=2, column=1)
+        self.task_user_combo = ttk.Combobox(self.frame)
+        self.task_user_combo.grid(row=2, column=1)
         tk.Button(self.frame, text="Add Task", command=self.add_task).grid(row=2, column=2)
 
         tk.Label(self.frame, text="New Status").grid(row=3, column=0)
@@ -49,6 +49,7 @@ class TaskApp:
 
         self.task_objects = []
         self.load_tasks()
+        self.update_user_combobox()
 
     def add_user(self):
         username = self.username_entry.get().strip()
@@ -56,27 +57,30 @@ class TaskApp:
             success = self.manager.add_user(username)
             if success:
                 messagebox.showinfo("User Added", f"User '{username}' added.")
+                self.update_user_combobox()
             else:
                 messagebox.showwarning("User Exists", f"User '{username}' already exists.")
             self.username_entry.delete(0, tk.END)
 
+    def update_user_combobox(self):
+        self.task_user_combo['values'] = self.manager.get_usernames()
+
     def add_task(self):
         title = self.task_title_entry.get().strip()
-        username = self.task_user_entry.get().strip()
+        username = self.task_user_combo.get().strip()
         description = self.task_desc_entry.get().strip()
         if title and username:
             result = self.manager.create_task(title, description, username)
             if result == "success":
                 messagebox.showinfo("Task Added", f"Task '{title}' assigned to '{username}' added.")
                 self.task_title_entry.delete(0, tk.END)
-                self.task_user_entry.delete(0, tk.END)
+                self.task_user_combo.set("")
                 self.task_desc_entry.delete(0, tk.END)
                 self.load_tasks()
             elif result == "duplicate_title":
                 messagebox.showwarning("Duplicate Task", f"A task titled '{title}' already exists.")
             elif result == "user_not_found":
                 messagebox.showerror("User Not Found", f"User '{username}' does not exist.")
-
         else:
             messagebox.showwarning("Missing data", "Please fill in both title and username.")
 
@@ -92,7 +96,8 @@ class TaskApp:
 
         if new_status:
             self.manager.change_status(selected_task, new_status)
-            messagebox.showinfo("Status Updated", f"Task '{selected_task.get_title()}' status changed to '{new_status}'.")
+            messagebox.showinfo("Status Updated", f"Task '{selected_task.get_title()}' "
+                                                  f"status changed to '{new_status}'.")
             self.status_var.set("")
             self.load_tasks()
         else:
