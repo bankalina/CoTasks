@@ -8,10 +8,6 @@ class Task:
         self.status = status
         self.assigned_to = assigned_to
 
-    @classmethod
-    def from_tuple(cls, row: tuple) -> "Task":
-        return cls(title=row[0], description=row[1], status=row[2], assigned_to=row[3])
-
     def get_title(self) -> str:
         return self.title
 
@@ -21,8 +17,11 @@ class Task:
     def get_status(self) -> str:
         return self.status
 
-    def get_assigned_to(self) -> str:
+    def get_assigned_to(self) -> Optional[str]:
         return self.assigned_to
+
+    def set_status(self, new_status: str):
+        self.status = new_status
 
     def display(self) -> str:
         return f"{self.title} - {self.status} - {self.description} - assigned to {self.assigned_to}"

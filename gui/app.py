@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox, Toplevel
+from tkinter import messagebox, Toplevel, ttk
 from core.task_manager import TaskManager
 from patterns.strategy import SortByTitle, SortByStatus
 
@@ -38,7 +37,7 @@ class TaskApp:
         self.status_combo = ttk.Combobox(self.frame, textvariable=self.status_var)
         self.status_combo['values'] = ["To Do", "In Progress", "Done"]
         self.status_combo.grid(row=3, column=1)
-        tk.Button(self.frame, text="Change Status", command=self.change_status).grid(row=3, column=2)
+        tk.Button(self.frame, text="Update Status", command=self.change_status).grid(row=3, column=2)
 
         tk.Button(self.frame, text="Sort by Title", command=lambda: self.set_sort("title")).grid(row=4, column=0)
         tk.Button(self.frame, text="Sort by Status", command=lambda: self.set_sort("status")).grid(row=4, column=1)
@@ -48,20 +47,23 @@ class TaskApp:
         self.task_listbox = tk.Listbox(self.root, width=60)
         self.task_listbox.pack(pady=10)
 
+        self.task_objects = []
         self.load_tasks()
 
     def add_user(self):
         username = self.username_entry.get().strip()
         if username:
-            self.manager.add_user(username)
-            messagebox.showinfo("User Added", f"User '{username}' added.")
+            success = self.manager.add_user(username)
+            if success:
+                messagebox.showinfo("User Added", f"User '{username}' added.")
+            else:
+                messagebox.showwarning("User Exists", f"User '{username}' already exists.")
             self.username_entry.delete(0, tk.END)
 
     def add_task(self):
         title = self.task_title_entry.get().strip()
         username = self.task_user_entry.get().strip()
         description = self.task_desc_entry.get().strip()
-
         if title and username:
             success = self.manager.create_task(title, description, username)
             if success:
@@ -80,15 +82,18 @@ class TaskApp:
         if not selection:
             messagebox.showwarning("No selection", "Select a task from the list.")
             return
+
         index = selection[0]
-        title_line = self.task_listbox.get(index)
-        title = title_line.split(" - ")[0].strip()
+        selected_task = self.task_objects[index]
         new_status = self.status_var.get().strip()
+
         if new_status:
-            self.manager.change_status(title, new_status)
-            messagebox.showinfo("Status Updated", f"Task '{title}' status changed to '{new_status}'.")
+            self.manager.change_status(selected_task, new_status)
+            messagebox.showinfo("Status Updated", f"Task '{selected_task.get_title()}' status changed to '{new_status}'.")
             self.status_var.set("")
             self.load_tasks()
+        else:
+            messagebox.showwarning("Missing status", "Please select a new status.")
 
     def set_sort(self, criteria):
         if criteria == "title":
@@ -99,8 +104,8 @@ class TaskApp:
 
     def load_tasks(self):
         self.task_listbox.delete(0, tk.END)
-        tasks = self.manager.list_tasks()
-        for task in tasks:
+        self.task_objects = self.manager.list_tasks()
+        for task in self.task_objects:
             self.task_listbox.insert(tk.END, task.display())
 
     def show_all_tasks(self):
@@ -109,5 +114,5 @@ class TaskApp:
         tk.Label(all_window, text="List of all tasks:", font=("Arial", 12, "bold")).pack(pady=5)
         all_list = tk.Listbox(all_window, width=70)
         all_list.pack(padx=10, pady=10)
-        for task in self.manager.list_tasks():
+        for task in self.task_objects:
             all_list.insert(tk.END, task.display())
