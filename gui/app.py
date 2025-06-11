@@ -34,7 +34,7 @@ class TaskApp:
 
         tk.Label(self.frame, text="New Status").grid(row=3, column=0)
         self.status_var = tk.StringVar()
-        self.status_combo = ttk.Combobox(self.frame, textvariable=self.status_var)
+        self.status_combo = ttk.Combobox(self.frame, textvariable=self.status_var, state="readonly")
         self.status_combo['values'] = ["To Do", "In Progress", "Done"]
         self.status_combo.grid(row=3, column=1)
         tk.Button(self.frame, text="Update Status", command=self.change_status).grid(row=3, column=2)
