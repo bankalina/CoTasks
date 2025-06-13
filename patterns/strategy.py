@@ -16,4 +16,6 @@ class SortByTitle(SortStrategy):
 
 class SortByStatus(SortStrategy):
     def sort(self, tasks: List[Task]) -> List[Task]:
-        return sorted(tasks, key=lambda t: t.status)
+        order = {"To Do": 0, "In Progress": 1, "Done": 2}
+        return sorted(tasks, key=lambda t: order.get(t.get_status(), 99))
+
